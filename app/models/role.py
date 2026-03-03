@@ -1,5 +1,3 @@
-from turtle import back
-
 from sqlalchemy import Integer, String
 from sqlalchemy.orm import mapped_column, relationship
 from app.db.base import Base

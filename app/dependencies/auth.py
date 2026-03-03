@@ -2,6 +2,8 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
+from app.core.permissions import Permission
+from app.core.calc_permission import calculate_user_permission_mask
 from app.core.redis import cache_user, get_cached_user
 from app.db.session import get_db
 from app.core.security import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
@@ -39,7 +41,7 @@ def get_current_user(
             "id": user.id,
             "username": user.username,
             "roles": [r.name for r in user.roles],
-            "permissions": list(set((p.name for role in user.roles for p in role.permissions))),
+            "permissions": calculate_user_permission_mask(user),
             "is_active": user.is_active,
             "token_version": user.token_version
         }
@@ -53,11 +55,11 @@ def get_current_user(
 
     return CurrentUser(**cached)
 
-def require_permission(permission_name: str):
+def require_permission(permission_mask: Permission):
 
-    def checker(current_user: CurrentUser = Depends(get_current_user), db: Session = Depends(get_db)):
+    def checker(current_user: CurrentUser = Depends(get_current_user)):
 
-        if permission_name not in current_user.permissions:
+        if not (permission_mask & current_user.permissions):
             raise PermissionDenied()
 
         return current_user

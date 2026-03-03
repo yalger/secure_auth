@@ -2,6 +2,7 @@ from datetime import datetime, timedelta, timezone
 import uuid
 from jose import jwt
 from passlib.context import CryptContext
+from app.core.calc_permission import calculate_user_permission_mask
 from app.models.user import User
 from app.core.redis import cache_user
 
@@ -40,7 +41,7 @@ def create_access_token(user: User, expires_delta: timedelta | None = None):
         "id": user.id,
         "username": user.username,
         "roles": [r.name for r in user.roles],
-        "permissions": list(set((p.name for role in user.roles for p in role.permissions))),
+        "permissions": calculate_user_permission_mask(user),
         "is_active": user.is_active,
         "token_version": user.token_version
     }, ttl=ACCESS_TOKEN_EXPIRE_MINUTES*60)

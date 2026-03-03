@@ -32,7 +32,7 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     db: Session = Depends(get_db)
 ):
-    
+
     access_token = AuthService.login(
         db=db,
         username=form_data.username,

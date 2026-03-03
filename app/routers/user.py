@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from app.core.permissions import Permission
 from app.db.session import get_db
 from app.schemas.response import APIResponse
 from app.schemas.role import AssignRoleRequest
@@ -13,7 +14,7 @@ def set_roles(
     user_id: int,
     request: AssignRoleRequest,
     db: Session = Depends(get_db),
-    current_user = Depends(require_permission("user:update"))
+    current_user = Depends(require_permission(Permission.USER_UPDATE))
 ):
     user = UserService.set_roles(db, user_id, request.role_names)
 

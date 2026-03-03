@@ -3,6 +3,7 @@ from typing import List
 from pydantic import BaseModel
 from sqlalchemy import String, Integer, Boolean, DateTime, text
 from sqlalchemy.orm import mapped_column, relationship
+from app.core.permissions import Permission
 from app.db.base import Base
 from app.models.associations import user_roles
 
@@ -23,4 +24,4 @@ class CurrentUser(BaseModel):
     id: int
     username: str
     roles: List[str]
-    permissions: List[str]
+    permissions: Permission
