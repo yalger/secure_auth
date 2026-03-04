@@ -1,25 +1,24 @@
 from fastapi import Depends
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
 from app.core.permissions import Permission
+from app.db.session import get_db
 from app.core.calc_permission import calculate_user_permission_mask
 from app.core.redis import cache_user, get_cached_user
-from app.db.session import get_db
 from app.core.security import SECRET_KEY, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTES
 from app.exceptions.auth_exceptions import InvalidCredentials, UserInactive, TokenInvalidated
 from app.exceptions.user_exceptions import PermissionDenied, UserNotFound
 from app.models.user import CurrentUser, User
 
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+security = HTTPBearer()
 
 def get_current_user(
-    token: str = Depends(oauth2_scheme),
+    credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db)
 ):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(credentials.credentials, SECRET_KEY, algorithms=[ALGORITHM])
         user_id = payload.get("sub")
         token_version = payload.get("token_version")
 
@@ -61,7 +60,7 @@ def require_permission(permission_mask: Permission):
 
         if not (permission_mask & current_user.permissions):
             raise PermissionDenied()
-
+        
         return current_user
 
     return checker

@@ -9,7 +9,7 @@ from app.dependencies.auth import require_permission
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
-@router.post("/{user_id}/roles")
+@router.post("/{user_id}/roles", response_model=APIResponse)
 def set_roles(
     user_id: int,
     request: AssignRoleRequest,

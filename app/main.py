@@ -12,7 +12,6 @@ from app.routers.user import router as user_router
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 启动时执行
-    Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     init_seed_data(db)
     db.close()
@@ -41,7 +40,7 @@ async def invalid_credentials_handler(request: Request, exc: InvalidCredentials)
         status_code=401,
         content={
             "success": False,
-            "message": "Invalid username or password"
+            "message": "Invalid credentials"
         }
     )
 

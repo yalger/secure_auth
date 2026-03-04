@@ -27,10 +27,10 @@ class UserService:
 
         # 权限变更 --> token 立即失效
         user.token_version += 1
-        
-        # 使 Redis 缓存失效
-        expire_cached_user(user.id)
 
         db.commit()
+
+        # 使 Redis 缓存失效
+        expire_cached_user(user.id)
 
         return user
