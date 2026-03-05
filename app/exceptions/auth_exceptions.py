@@ -12,3 +12,7 @@ class UserInactive(Exception):
 
 class TokenInvalidated(Exception):
     pass
+
+
+class LoginRateLimitExceeded(Exception):
+    pass

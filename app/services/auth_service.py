@@ -2,11 +2,12 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-from app.exceptions.auth_exceptions import UserAlreadyExists, InvalidCredentials, UserInactive
+from app.core.rate_limiter import check_login_rate_limit, clear_login_attempts
+from app.core.security import create_access_token, create_refresh_token, get_password_hash, verify_password 
+from app.exceptions.auth_exceptions import LoginRateLimitExceeded, UserAlreadyExists, InvalidCredentials, UserInactive
 from app.exceptions.user_exceptions import UserNotFound
 from app.models.refresh_token import RefreshToken
 from app.models.user import User
-from app.core.security import create_refresh_token, get_password_hash, verify_password, create_access_token
 
 class AuthService:
 
@@ -33,7 +34,10 @@ class AuthService:
         return new_user
 
     @staticmethod
-    def login(db: Session, username: str, password: str):
+    def login(db: Session, ip: str, username: str, password: str):
+
+        if not check_login_rate_limit(ip, username):
+            raise LoginRateLimitExceeded()
 
         user = db.query(User).filter(
             User.username == username
@@ -50,6 +54,8 @@ class AuthService:
 
         access_token = create_access_token(user)
         refresh_token = create_refresh_token(user, db=db)
+
+        clear_login_attempts(ip, username)
 
         return {
             "access_token": access_token,

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.dependencies.auth import get_current_user
@@ -32,27 +32,29 @@ def register(
 
 @router.post("/login", response_model=TokenResponse)
 def login(
-    request: LoginRequest,
+    request: Request,
+    data: LoginRequest,
     db: Session = Depends(get_db)
 ):
 
     tokens = AuthService.login(
         db=db,
-        username=request.username,
-        password=request.password
+        ip=request.client.host,
+        username=data.username,
+        password=data.password
     )
 
     return TokenResponse(**tokens)
 
-@router.post("/logout")
+@router.post("/logout", response_model=APIResponse)
 def logout(
-    request: LogoutRequest,
+    data: LogoutRequest,
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user)
 ):
     AuthService.logout(
         db=db,
-        refresh_token_str=request.refresh_token
+        refresh_token_str=data.refresh_token
     )
 
     return APIResponse(
@@ -72,13 +74,13 @@ def read_me(
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh_token(
-    request: RefreshRequest,
+    data: RefreshRequest,
     db: Session = Depends(get_db)
 ):
 
     tokens = AuthService.refresh_token(
         db=db,
-        refresh_token_str=request.refresh_token
+        refresh_token_str=data.refresh_token
     )
 
     return TokenResponse(**tokens)

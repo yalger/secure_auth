@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from app.core.seed import init_seed_data
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
-from app.exceptions.auth_exceptions import InvalidCredentials, TokenInvalidated, UserAlreadyExists, UserInactive
+from app.exceptions.auth_exceptions import InvalidCredentials, LoginRateLimitExceeded, TokenInvalidated, UserAlreadyExists, UserInactive
 from app.exceptions.user_exceptions import CannotRemoveDefaultAdmin, PermissionDenied, RoleNotFound, UserNotFound
 from app.routers.auth import router as auth_router
 from app.routers.user import router as user_router
@@ -61,6 +61,16 @@ async def token_invalidated_handler(request: Request, exc: TokenInvalidated):
         content={
             "success": False,
             "message": "Token invalidated"
+        }
+    )
+
+@app.exception_handler(LoginRateLimitExceeded)
+async def login_rate_limit_exceeded_handler(request: Request, exc: LoginRateLimitExceeded):
+    return JSONResponse(
+        status_code=429,
+        content={
+            "success": False,
+            "message": "Login rate limit exceeded"
         }
     )
 
