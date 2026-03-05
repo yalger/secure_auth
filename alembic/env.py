@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.models import user, role, permission
+from app.models import user, role, permission, refresh_token, audit_log
 from app.db.base import Base
 from app.core.config import settings
 

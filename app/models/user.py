@@ -15,7 +15,7 @@ class User(Base):
     email = mapped_column(String(100), unique=True, nullable=False)
     password_hash = mapped_column(String(255), nullable=False)
     is_active = mapped_column(Boolean, nullable=False, server_default=text("true"), default=True)
-    created_at = mapped_column(DateTime, nullable=False, server_default=text("now()"), default=datetime.now(timezone.utc))
+    created_at = mapped_column(DateTime, nullable=False, server_default=text("now()"), default=datetime.now)
     token_version = mapped_column(Integer, nullable=False, server_default=text("0"))
 
     roles = relationship("Role", secondary=user_roles, back_populates="users")

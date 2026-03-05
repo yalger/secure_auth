@@ -62,6 +62,6 @@ def create_refresh_token(user, db: Session):
     )
 
     db.add(refresh_token)
-    db.commit()
+    # 只 add，不 commit，事务由外层控制
 
     return refresh_token_str

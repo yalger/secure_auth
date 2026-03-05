@@ -13,15 +13,17 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/register", response_model=APIResponse)
 def register(
-    user_in: UserCreate,
+    request: Request,
+    data: UserCreate,
     db: Session = Depends(get_db)
 ):
 
     new_user = AuthService.register(
         db=db,
-        username=user_in.username,
-        email=user_in.email,
-        password=user_in.password
+        request=request,
+        username=data.username,
+        email=data.email,
+        password=data.password
     )
 
     return APIResponse(
@@ -39,7 +41,7 @@ def login(
 
     tokens = AuthService.login(
         db=db,
-        ip=request.client.host,
+        request=request,
         username=data.username,
         password=data.password
     )
@@ -48,12 +50,15 @@ def login(
 
 @router.post("/logout", response_model=APIResponse)
 def logout(
+    request: Request,
     data: LogoutRequest,
     db: Session = Depends(get_db),
     current_user: CurrentUser = Depends(get_current_user)
 ):
     AuthService.logout(
         db=db,
+        request=request,
+        current_user=current_user,
         refresh_token_str=data.refresh_token
     )
 
@@ -74,12 +79,14 @@ def read_me(
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh_token(
+    request: Request,
     data: RefreshRequest,
     db: Session = Depends(get_db)
 ):
 
     tokens = AuthService.refresh_token(
         db=db,
+        request=request,
         refresh_token_str=data.refresh_token
     )
 
