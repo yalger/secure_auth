@@ -1,13 +1,13 @@
 from logging.config import fileConfig
+import os
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from alembic import context
 
-from app.models import user, role, permission, refresh_token, audit_log
+from app.models import associations, audit_log, permission, refresh_token, role, user
 from app.db.base import Base
-from app.core.config import settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -44,7 +44,7 @@ def run_migrations_offline() -> None:
     """
     url = config.set_main_option(
         "sqlalchemy.url",
-        settings.DATABASE_URL
+        os.getenv("DATABASE_URL")
     )
     context.configure(
         url=url,
@@ -66,7 +66,7 @@ def run_migrations_online() -> None:
     """
     config.set_main_option(
         "sqlalchemy.url",
-        settings.DATABASE_URL
+        os.getenv("DATABASE_URL")
     )
 
     connectable = engine_from_config(

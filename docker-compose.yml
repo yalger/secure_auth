@@ -1,0 +1,36 @@
+version: "1.0"
+
+services:
+
+  api:
+    build: .
+    container_name: secure_auth_api
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+    env_file:
+      - .env
+
+  postgres:
+    image: postgres:15
+    container_name: secure_auth_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: secure_user
+      POSTGRES_PASSWORD: secure_user
+      POSTGRES_DB: secure_auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: secure_auth_redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:
